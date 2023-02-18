@@ -9,6 +9,7 @@ import (
 	"github.com/android-project-46group/core-api/config"
 	"github.com/android-project-46group/core-api/util/logger"
 	pb "github.com/android-project-46group/protobuf/gen/go/protobuf"
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 )
 
@@ -31,6 +32,9 @@ func New(c config.Config, l logger.Logger) pb.DownloadServer {
 }
 
 func (h *handler) Health(ctx context.Context, in *pb.HealthRequest) (*pb.HealthReply, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "handler.Health")
+	defer span.Finish()
+
 	h.logger.Info(ctx, "health check")
 
 	return &pb.HealthReply{
@@ -47,9 +51,6 @@ func ServeGRPC(port string, server pb.DownloadServer) error {
 	s := grpc.NewServer()
 	pb.RegisterDownloadServer(s, server)
 
-	if err := s.Serve(lis); err != nil {
-		return fmt.Errorf("failed to Serve: %w", err)
-	}
-
-	return nil
+	//nolint:wrapcheck
+	return s.Serve(lis)
 }

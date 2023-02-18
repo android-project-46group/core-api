@@ -5,3 +5,6 @@ linters-settings:
   option: value
 linters:
   enable-all: true
+  disable:
+    # New で interface を戻り値とすることを許す。
+    - ireturn

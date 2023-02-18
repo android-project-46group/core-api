@@ -14,7 +14,7 @@ type Config struct {
 	Service string
 }
 
-// New returns the config
+// New returns the config.
 func New() (Config, error) {
 	c := Config{
 		GrpcPort: grpcPort,

@@ -12,14 +12,15 @@ import (
 )
 
 type handler struct {
-	c config.Config
-
 	pb.UnimplementedDownloadServer
+
+	c config.Config
 }
 
-func New(c config.Config) handler {
-	h := handler{
-		c: c,
+func New(c config.Config) pb.DownloadServer {
+	h := &handler{
+		UnimplementedDownloadServer: pb.UnimplementedDownloadServer{},
+		c:                           c,
 	}
 
 	return h
@@ -27,19 +28,22 @@ func New(c config.Config) handler {
 
 func (h *handler) Health(ctx context.Context, in *pb.HealthRequest) (*pb.HealthReply, error) {
 	return &pb.HealthReply{
-		Message: "{\"health\", \"ok\"}",
+		Message: "{\"health\": \"ok\"}",
 	}, nil
 }
 
-func (h *handler) Serve() error {
-
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", h.c.GrpcPort))
+func ServeGRPC(port string, server pb.DownloadServer) error {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterDownloadServer(s, h)
+	pb.RegisterDownloadServer(s, server)
 
-	return s.Serve(lis)
+	if err := s.Serve(lis); err != nil {
+		return fmt.Errorf("failed to Serve: %w", err)
+	}
+
+	return nil
 }

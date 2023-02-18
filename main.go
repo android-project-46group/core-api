@@ -6,7 +6,9 @@ import (
 
 	"github.com/android-project-46group/core-api/config"
 	"github.com/android-project-46group/core-api/handler"
+	"github.com/android-project-46group/core-api/util"
 	"github.com/android-project-46group/core-api/util/logger"
+	"github.com/opentracing/opentracing-go"
 )
 
 func main() {
@@ -15,12 +17,20 @@ func main() {
 		log.Fatal("failed to initialize configuration: ", err)
 	}
 
-	logger, closer, err := logger.NewFileLogger(cfg.LogPath, "ubuntu", cfg.Service)
+	logger, fileCloser, err := logger.NewFileLogger(cfg.LogPath, "ubuntu", cfg.Service)
 	if err != nil {
 		log.Fatal("failed to initialize logger: ", err)
 	}
 
-	defer closer()
+	defer fileCloser()
+
+	tracer, traceCloser, err := util.NewJaegerTracer(cfg.Service)
+	if err != nil {
+		logger.Errorf(context.Background(), "cannot initialize jaeger tracer: ", err)
+	}
+
+	defer traceCloser.Close()
+	opentracing.SetGlobalTracer(tracer)
 
 	h := handler.New(cfg, logger)
 	if err := handler.ServeGRPC(cfg.GrpcPort, h); err != nil {

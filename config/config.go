@@ -3,6 +3,7 @@ package config
 const (
 	grpcPort = "9876"
 	service  = "saka-core-api"
+	logPath  = "./core-api-log.txt"
 )
 
 // Configuration values used throughout the application.
@@ -12,14 +13,18 @@ type Config struct {
 
 	// Service name (also used for tracer)
 	Service string
+
+	// File path to log output.
+	LogPath string
 }
 
 // New returns the config.
 func New() (Config, error) {
-	c := Config{
+	cfg := Config{
 		GrpcPort: grpcPort,
 		Service:  service,
+		LogPath:  logPath,
 	}
 
-	return c, nil
+	return cfg, nil
 }

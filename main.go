@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/android-project-46group/core-api/config"
 	"github.com/android-project-46group/core-api/handler"
+	"github.com/android-project-46group/core-api/util/logger"
 )
 
 func main() {
@@ -13,8 +15,15 @@ func main() {
 		log.Fatal("failed to initialize configuration: ", err)
 	}
 
-	h := handler.New(cfg)
+	logger, closer, err := logger.NewFileLogger(cfg.LogPath, "ubuntu", cfg.Service)
+	if err != nil {
+		log.Fatal("failed to initialize logger: ", err)
+	}
+
+	defer closer()
+
+	h := handler.New(cfg, logger)
 	if err := handler.ServeGRPC(cfg.GrpcPort, h); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		logger.Errorf(context.Background(), "failed to serve: %v", err)
 	}
 }

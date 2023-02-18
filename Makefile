@@ -18,7 +18,10 @@ bootstrap: ## 外部ツールをインストールする。
 godoc:	## godoc をローカルで表示する。http://localhost:8080/{module_name}
 	pkgsite
 
-.PHONY: lint
+.PHONY: lint serve
 
 lint:	## golangci を使って lint を走らせる
 	golangci-lint run -v
+
+serve:
+	go run main.go

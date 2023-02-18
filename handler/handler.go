@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/android-project-46group/core-api/config"
+	"github.com/android-project-46group/core-api/util/logger"
 	pb "github.com/android-project-46group/protobuf/gen/go/protobuf"
 	"google.golang.org/grpc"
 )
@@ -14,19 +15,24 @@ import (
 type handler struct {
 	pb.UnimplementedDownloadServer
 
-	c config.Config
+	config config.Config
+	logger logger.Logger
 }
 
-func New(c config.Config) pb.DownloadServer {
-	h := &handler{
+func New(c config.Config, l logger.Logger) pb.DownloadServer {
+	handler := &handler{
 		UnimplementedDownloadServer: pb.UnimplementedDownloadServer{},
-		c:                           c,
+
+		config: c,
+		logger: l,
 	}
 
-	return h
+	return handler
 }
 
 func (h *handler) Health(ctx context.Context, in *pb.HealthRequest) (*pb.HealthReply, error) {
+	h.logger.Info(ctx, "health check")
+
 	return &pb.HealthReply{
 		Message: "{\"health\": \"ok\"}",
 	}, nil

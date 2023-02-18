@@ -2,7 +2,10 @@ run:
   timeout: 3m
 
 linters-settings:
-  option: value
+  gomnd:
+    settings:
+      mnd:
+        ignored-numbers: "0o666"
 linters:
   enable-all: true
   disable:

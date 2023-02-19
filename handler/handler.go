@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/android-project-46group/core-api/config"
+	"github.com/android-project-46group/core-api/usecase"
 	"github.com/android-project-46group/core-api/util/logger"
 	pb "github.com/android-project-46group/protobuf/gen/go/protobuf"
 	"github.com/opentracing/opentracing-go"
@@ -16,16 +17,18 @@ import (
 type handler struct {
 	pb.UnimplementedDownloadServer
 
-	config config.Config
-	logger logger.Logger
+	usecase usecase.Usecase
+	config  config.Config
+	logger  logger.Logger
 }
 
-func New(c config.Config, l logger.Logger) pb.DownloadServer {
+func New(config config.Config, logger logger.Logger, usecase usecase.Usecase) pb.DownloadServer {
 	handler := &handler{
 		UnimplementedDownloadServer: pb.UnimplementedDownloadServer{},
 
-		config: c,
-		logger: l,
+		config:  config,
+		logger:  logger,
+		usecase: usecase,
 	}
 
 	return handler

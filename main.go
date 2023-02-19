@@ -6,6 +6,9 @@ import (
 
 	"github.com/android-project-46group/core-api/config"
 	"github.com/android-project-46group/core-api/handler"
+	db "github.com/android-project-46group/core-api/repository/database"
+	"github.com/android-project-46group/core-api/repository/remote"
+	"github.com/android-project-46group/core-api/usecase"
 	"github.com/android-project-46group/core-api/util"
 	"github.com/android-project-46group/core-api/util/logger"
 	"github.com/opentracing/opentracing-go"
@@ -32,7 +35,15 @@ func main() {
 	defer traceCloser.Close()
 	opentracing.SetGlobalTracer(tracer)
 
-	h := handler.New(cfg, logger)
+	database, err := db.New(context.Background(), cfg, logger)
+	if err != nil {
+		logger.Errorf(context.Background(), "failed to db.New: ", err)
+	}
+
+	client := remote.New()
+	usecase := usecase.New(database, client, logger)
+
+	h := handler.New(cfg, logger, usecase)
 	if err := handler.ServeGRPC(cfg.GrpcPort, h); err != nil {
 		logger.Errorf(context.Background(), "failed to serve: %v", err)
 	}

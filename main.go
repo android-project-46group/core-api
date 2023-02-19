@@ -35,13 +35,13 @@ func main() {
 	defer traceCloser.Close()
 	opentracing.SetGlobalTracer(tracer)
 
-	db, err := db.New(context.Background(), cfg)
+	database, err := db.New(context.Background(), cfg, logger)
 	if err != nil {
 		logger.Errorf(context.Background(), "failed to db.New: ", err)
 	}
-	client := remote.New()
 
-	usecase := usecase.New(db, client)
+	client := remote.New()
+	usecase := usecase.New(database, client)
 
 	h := handler.New(cfg, logger, usecase)
 	if err := handler.ServeGRPC(cfg.GrpcPort, h); err != nil {

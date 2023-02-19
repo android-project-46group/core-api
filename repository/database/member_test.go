@@ -32,8 +32,10 @@ func TestGetPositionsAPI(t *testing.T) {
 							"member_id", "group_name", "name_ja", "birthday", "height_cm", "blood_type",
 							"generation", "blog_url", "img_url", "left_at",
 						}).
-							AddRow(1, "nogizaka", "john doe", "2004-06-08", 160.0, "O型", "4期生", "https://test", "https://test.img", nil).
-							AddRow(2, "nogizaka", "john dona", "1999-03-05", 161.0, "O型", "2期生", "https://test2", "https://test2.img", "2023-02-19"),
+							AddRow(1, "nogizaka", "john doe", "2004-06-08", 160.0, "O型",
+								"4期生", "https://test", "https://test.img", nil).
+							AddRow(2, "nogizaka", "john dona", "1999-03-05", 161.0, "O型",
+								"2期生", "https://test2", "https://test2.img", "2023-02-19"),
 					)
 			},
 			expectedMembers: []*model.Member{

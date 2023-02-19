@@ -41,7 +41,7 @@ func main() {
 	}
 
 	client := remote.New()
-	usecase := usecase.New(database, client)
+	usecase := usecase.New(database, client, logger)
 
 	h := handler.New(cfg, logger, usecase)
 	if err := handler.ServeGRPC(cfg.GrpcPort, h); err != nil {

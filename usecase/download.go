@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -18,11 +20,19 @@ const (
 	imgDir     = "imgs"
 )
 
-func (u *usecase) DownloadMembersZip(ctx context.Context) ([]byte, error) {
+func (u *usecase) DownloadMembersZip(ctx context.Context) (io.Reader, error) {
 	randomPath, err := u.createUniqueDir(workingDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to createUniqueDir: %w", err)
 	}
+
+	// 処理終了時に一時ファイルを削除する。
+	// return が file の reader になったら怪しいかもしれない。
+	defer func() {
+		if err := os.RemoveAll(randomPath); err != nil {
+			u.logger.Warnf(ctx, "failed to remove dir: %v", err)
+		}
+	}()
 
 	members, err := u.database.ListMembers(ctx)
 	if err != nil {
@@ -48,7 +58,15 @@ func (u *usecase) DownloadMembersZip(ctx context.Context) ([]byte, error) {
 		}
 	}
 
-	return nil, nil
+	// writer 兼 reader
+	buffer := bytes.NewBuffer([]byte{})
+
+	err = u.createZip(randomPath, buffer)
+	if err != nil {
+		u.logger.Warnf(ctx, "failed to createZip: %v", err)
+	}
+
+	return buffer, nil
 }
 
 func (u *usecase) writeMembersJSON(members []*model.Member, fullPath string) error {

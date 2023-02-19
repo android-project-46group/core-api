@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"io"
 
 	"github.com/android-project-46group/core-api/repository"
 	"github.com/android-project-46group/core-api/util/logger"
@@ -9,7 +10,7 @@ import (
 
 type Usecase interface {
 	// メンバー関連情報一覧を zip 形式で全取得する。
-	DownloadMembersZip(ctx context.Context) ([]byte, error)
+	DownloadMembersZip(ctx context.Context) (io.Reader, error)
 }
 
 type usecase struct {

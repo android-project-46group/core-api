@@ -10,7 +10,7 @@ import (
 
 type Usecase interface {
 	// メンバー関連情報一覧を zip 形式で全取得する。
-	DownloadMembersZip(ctx context.Context, x io.Writer) error
+	DownloadMembersZip(ctx context.Context, writer io.Writer) error
 }
 
 type usecase struct {

@@ -23,11 +23,11 @@ godoc:	## godoc をローカルで表示する。http://localhost:8080/{module_n
 lint:	## golangci を使って lint を走らせる
 	golangci-lint run -v
 
-lint-fix:
+lint-fix:	## lint 実行時, gofumpt のエラーが出たらやると良い
 	golangci-lint run --fix
 
-serve:
+serve:	## サーバーを起動する
 	go run main.go
 
-test:
-	go test -cover -shuffle=on ./...
+test:	## 全テストを実行
+	go test -cover -shuffle=on ./... -v

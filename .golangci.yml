@@ -5,7 +5,7 @@ linters-settings:
   gomnd:
     settings:
       mnd:
-        ignored-numbers: "0o666"
+        ignored-numbers: "0o666,0o777"
 linters:
   enable-all: true
   disable:

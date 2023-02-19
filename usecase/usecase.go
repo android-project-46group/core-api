@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/android-project-46group/core-api/repository"
+	"github.com/android-project-46group/core-api/util/logger"
 )
 
 type Usecase interface {
@@ -14,13 +15,16 @@ type Usecase interface {
 type usecase struct {
 	database repository.Database
 	remote   repository.Remote
+
+	logger logger.Logger
 }
 
-func New(database repository.Database, remote repository.Remote) Usecase {
-	u := &usecase{
+func New(database repository.Database, remote repository.Remote, logger logger.Logger) Usecase {
+	usecase := &usecase{
 		database: database,
 		remote:   remote,
+		logger:   logger,
 	}
 
-	return u
+	return usecase
 }

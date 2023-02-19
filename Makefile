@@ -23,5 +23,8 @@ godoc:	## godoc をローカルで表示する。http://localhost:8080/{module_n
 lint:	## golangci を使って lint を走らせる
 	golangci-lint run -v
 
+lint-fix:
+	golangci-lint run --fix
+
 serve:
 	go run main.go

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"io"
 
 	"github.com/android-project-46group/core-api/model"
 )
@@ -15,5 +16,5 @@ type Database interface {
 // HTTP 通信を伴う interface。
 type Remote interface {
 	// 対象 URL の画像を byte 配列で取得する。
-	GetImage(ctx context.Context, url string) ([]byte, error)
+	GetImage(ctx context.Context, url string) (io.Reader, func(), error)
 }

@@ -7,6 +7,10 @@ github.com/HdrHistogram/hdrhistogram-go v1.1.2/go.mod h1:yDgFjdqOqDEKOvasDdhWNXY
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
 github.com/android-project-46group/protobuf/gen/go/protobuf v0.0.0-20230218194654-be770a016789 h1:IiSPeKnTJ4KI1U5jxN31NzG1JIjnDeNzvgqXsDJapr4=
 github.com/android-project-46group/protobuf/gen/go/protobuf v0.0.0-20230218194654-be770a016789/go.mod h1:rpi3/7Yo61gWqsT3fLW9bE6ODBE15K6dSkmtorPT3ns=
+github.com/android-project-46group/protobuf/gen/go/protobuf v0.0.0-20230219104720-46bde4a73fd6 h1:Pc+Gw/kXs6ZHnR5RLBLYV/ig+4KYfO5RKiqr66pBKl0=
+github.com/android-project-46group/protobuf/gen/go/protobuf v0.0.0-20230219104720-46bde4a73fd6/go.mod h1:FcEH+JJ0+/QrJpbbkPQ0guKv4a4udyR5yPzTVjvIVPU=
+github.com/android-project-46group/protobuf/gen/go/protobuf v0.0.0-20230219122650-5f359d54897a h1:vB3ZMjjrLFh+Gs5zdbpXp6OZxCL2jFh57H4LqgKkaho=
+github.com/android-project-46group/protobuf/gen/go/protobuf v0.0.0-20230219122650-5f359d54897a/go.mod h1:FcEH+JJ0+/QrJpbbkPQ0guKv4a4udyR5yPzTVjvIVPU=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

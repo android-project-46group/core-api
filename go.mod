@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/android-project-46group/protobuf/gen/go/protobuf v0.0.0-20230218194654-be770a016789
+	github.com/android-project-46group/protobuf/gen/go/protobuf v0.0.0-20230219122650-5f359d54897a
 	github.com/lib/pq v1.10.7
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/stretchr/testify v1.8.1

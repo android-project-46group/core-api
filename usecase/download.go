@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	workingDir = "tmp"
-	imgDir     = "imgs"
+	workingDir   = "tmp"
+	imgDir       = "imgs"
+	jsonFileName = "members_info.json"
 )
 
 func (u *usecase) DownloadMembersZip(ctx context.Context, writer io.Writer) error {
@@ -26,7 +27,6 @@ func (u *usecase) DownloadMembersZip(ctx context.Context, writer io.Writer) erro
 	}
 
 	// 処理終了時に一時ファイルを削除する。
-	// return が file の reader になったら怪しいかもしれない。
 	defer func() {
 		if err := os.RemoveAll(randomPath); err != nil {
 			u.logger.Warnf(ctx, "failed to remove dir: %v", err)
@@ -38,7 +38,7 @@ func (u *usecase) DownloadMembersZip(ctx context.Context, writer io.Writer) erro
 		return fmt.Errorf("failed to ListMembers: %w", err)
 	}
 
-	jsonPath := filepath.Join(randomPath, "members_info.json")
+	jsonPath := filepath.Join(randomPath, jsonFileName)
 	if err := u.writeMembersJSON(members, jsonPath); err != nil {
 		return fmt.Errorf("faild to writeMembersJson: %w", err)
 	}
@@ -110,8 +110,7 @@ func (u *usecase) downloadImage(ctx context.Context, url, fullPath string) error
 
 // 引数で受け取った basePath 配下に、unique なフォルダを作成する。
 //
-// フォルダ名は uuid で構成され、return の string では
-// basePath も含んだパス全体が返される。
+// フォルダ名は uuid であり、return の string では basePath も含んだパス全体が返される。
 func (u *usecase) createUniqueDir(basePath string) (string, error) {
 	uuid, err := uuid.NewRandom()
 	if err != nil {
@@ -160,7 +159,7 @@ func (u *usecase) createZip(targetDir string, readWriter io.Writer) error {
 			return nil
 		}
 
-		// 圧縮
+		// 圧縮する。
 		fileToZip, err := os.Open(path)
 		if err != nil {
 			return fmt.Errorf("failed to Open: %w", err)

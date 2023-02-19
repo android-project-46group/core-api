@@ -12,6 +12,7 @@ import (
 
 	"github.com/android-project-46group/core-api/model"
 	"github.com/google/uuid"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -47,15 +48,32 @@ func (u *usecase) DownloadMembersZip(ctx context.Context, writer io.Writer) erro
 		return fmt.Errorf("faild to initializeImgDir: %w", err)
 	}
 
-	for _, member := range members {
-		fileName := path.Base(member.ImgURL)
-		fullPath := filepath.Join(randomPath, imgDir, fileName)
+	//nolint:varnamelen
+	eg := errgroup.Group{}
+	imgParallel := make(chan bool, len(members))
 
-		err := u.downloadImage(ctx, member.ImgURL, fullPath)
-		if err != nil {
-			u.logger.Warnf(ctx, "failed to downloadImage: %v", err)
-		}
+	for _, member := range members {
+		member := member
+		imgParallel <- true
+
+		eg.Go(func() error {
+			fileName := path.Base(member.ImgURL)
+			fullPath := filepath.Join(randomPath, imgDir, fileName)
+
+			err := u.downloadImage(ctx, member.ImgURL, fullPath)
+			if err != nil {
+				u.logger.Warnf(ctx, "failed to downloadImage: %v", err)
+			}
+
+			return nil
+		})
 	}
+
+	if err := eg.Wait(); err != nil {
+		return fmt.Errorf("failed to image parallel fetch: %w", err)
+	}
+
+	close(imgParallel)
 
 	err = u.createZip(randomPath, writer)
 	if err != nil {

@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"archive/zip"
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -20,10 +19,10 @@ const (
 	imgDir     = "imgs"
 )
 
-func (u *usecase) DownloadMembersZip(ctx context.Context) (io.Reader, error) {
+func (u *usecase) DownloadMembersZip(ctx context.Context, writer io.Writer) error {
 	randomPath, err := u.createUniqueDir(workingDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to createUniqueDir: %w", err)
+		return fmt.Errorf("failed to createUniqueDir: %w", err)
 	}
 
 	// 処理終了時に一時ファイルを削除する。
@@ -36,16 +35,16 @@ func (u *usecase) DownloadMembersZip(ctx context.Context) (io.Reader, error) {
 
 	members, err := u.database.ListMembers(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to ListMembers: %w", err)
+		return fmt.Errorf("failed to ListMembers: %w", err)
 	}
 
 	jsonPath := filepath.Join(randomPath, "members_info.json")
 	if err := u.writeMembersJSON(members, jsonPath); err != nil {
-		return nil, fmt.Errorf("faild to writeMembersJson: %w", err)
+		return fmt.Errorf("faild to writeMembersJson: %w", err)
 	}
 
 	if err := u.initializeImgDir(filepath.Join(randomPath, imgDir)); err != nil {
-		return nil, fmt.Errorf("faild to initializeImgDir: %w", err)
+		return fmt.Errorf("faild to initializeImgDir: %w", err)
 	}
 
 	for _, member := range members {
@@ -58,15 +57,12 @@ func (u *usecase) DownloadMembersZip(ctx context.Context) (io.Reader, error) {
 		}
 	}
 
-	// writer 兼 reader
-	buffer := bytes.NewBuffer([]byte{})
-
-	err = u.createZip(randomPath, buffer)
+	err = u.createZip(randomPath, writer)
 	if err != nil {
 		u.logger.Warnf(ctx, "failed to createZip: %v", err)
 	}
 
-	return buffer, nil
+	return nil
 }
 
 func (u *usecase) writeMembersJSON(members []*model.Member, fullPath string) error {
@@ -142,9 +138,7 @@ func (u *usecase) initializeImgDir(imgDir string) error {
 }
 
 // targetDir 配下のファイルを再帰的に zip 化し、渡された writer に書き込む。
-//
-//nolint:interfacer
-func (u *usecase) createZip(targetDir string, readWriter io.ReadWriter) error {
+func (u *usecase) createZip(targetDir string, readWriter io.Writer) error {
 	zipWriter := zip.NewWriter(readWriter)
 	defer zipWriter.Close()
 

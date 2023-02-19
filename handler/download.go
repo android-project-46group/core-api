@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -25,7 +26,10 @@ func (h *handler) DownloadMembersZip(
 
 	h.logger.Infof(ctx, "handler.DownloadMembersZip: group ", req.Group.String())
 
-	reader, err := h.usecase.DownloadMembersZip(ctx)
+	// writer 兼 reader
+	buffer := bytes.NewBuffer([]byte{})
+
+	err := h.usecase.DownloadMembersZip(ctx, buffer)
 	if err != nil {
 		return fmt.Errorf("failed to DownloadMembersZip: %w", err)
 	}
@@ -33,7 +37,7 @@ func (h *handler) DownloadMembersZip(
 	buf := make([]byte, streamDataCapacity)
 
 	for {
-		size, err := reader.Read(buf)
+		size, err := buffer.Read(buf)
 		if errors.Is(err, io.EOF) {
 			break
 		}

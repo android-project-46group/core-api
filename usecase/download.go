@@ -122,3 +122,66 @@ func (u *usecase) initializeImgDir(imgDir string) error {
 
 	return nil
 }
+
+// targetDir 配下のファイルを再帰的に zip 化し、渡された writer に書き込む。
+//
+//nolint:interfacer
+func (u *usecase) createZip(targetDir string, readWriter io.ReadWriter) error {
+	zipWriter := zip.NewWriter(readWriter)
+	defer zipWriter.Close()
+
+	// ディレクトリを再帰的に探索する。
+	err := filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("failed to Walk: %w", err)
+		}
+
+		// 圧縮するファイル名を生成する。
+		relPath, err := filepath.Rel(targetDir, path)
+		if err != nil {
+			return fmt.Errorf("failed to Rel: %w", err)
+		}
+		zipPath := filepath.ToSlash(filepath.Join(filepath.Dir(relPath), filepath.Base(path)))
+
+		// ディレクトリは飛ばす。
+		if info.IsDir() {
+			return nil
+		}
+
+		// 圧縮
+		fileToZip, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("failed to Open: %w", err)
+		}
+		defer fileToZip.Close()
+
+		fileToZipStat, err := fileToZip.Stat()
+		if err != nil {
+			return fmt.Errorf("failed to Stat: %w", err)
+		}
+
+		header, err := zip.FileInfoHeader(fileToZipStat)
+		if err != nil {
+			return fmt.Errorf("failed to FileInfoHeader: %w", err)
+		}
+
+		header.Name = zipPath
+		header.Method = zip.Deflate
+
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return fmt.Errorf("failed to CreateHeader: %w", err)
+		}
+
+		if _, err = io.Copy(writer, fileToZip); err != nil {
+			return fmt.Errorf("failed to io.Copy: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to %w", err)
+	}
+
+	return nil
+}

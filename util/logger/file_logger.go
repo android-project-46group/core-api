@@ -26,7 +26,7 @@ func NewFileLogger(
 	path string,
 	host string,
 	service string,
-) (Logger, func(), error) {
+) (Logger, func() error, error) {
 	//nolint:nosnakecase
 	logfile, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666)
 	if err != nil {
@@ -40,8 +40,8 @@ func NewFileLogger(
 		service: service,
 	}
 
-	return logger, func() {
-		logfile.Close()
+	return logger, func() error {
+		return logfile.Close()
 	}, nil
 }
 

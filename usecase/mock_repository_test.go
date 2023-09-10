@@ -16,9 +16,9 @@ func (m *mockDatabase) ListMembers(ctx context.Context) ([]*model.Member, error)
 }
 
 type mockRemote struct {
-	GetImageFunc func(ctx context.Context, url string) (io.Reader, func(), error)
+	GetImageFunc func(ctx context.Context, url string) (io.ReadCloser, error)
 }
 
-func (m *mockRemote) GetImage(ctx context.Context, url string) (io.Reader, func(), error) {
+func (m *mockRemote) GetImage(ctx context.Context, url string) (io.ReadCloser, error) {
 	return m.GetImageFunc(ctx, url)
 }

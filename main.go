@@ -25,14 +25,22 @@ func main() {
 		log.Fatal("failed to initialize logger: ", err)
 	}
 
-	defer fileCloser()
+	defer func() {
+		if err := fileCloser(); err != nil {
+			logger.Warnf(context.Background(), "failed to fileCloser: ", err)
+		}
+	}()
 
 	tracer, traceCloser, err := util.NewJaegerTracer(cfg.Service)
 	if err != nil {
 		logger.Errorf(context.Background(), "cannot initialize jaeger tracer: ", err)
 	}
 
-	defer traceCloser.Close()
+	defer func() {
+		if err := traceCloser.Close(); err != nil {
+			logger.Warnf(context.Background(), "failed to traceCloser: ", err)
+		}
+	}()
 	opentracing.SetGlobalTracer(tracer)
 
 	database, err := db.New(context.Background(), cfg, logger)

@@ -111,12 +111,17 @@ func (u *usecase) writeMembersJSON(members []*model.Member, fullPath string) (er
 }
 
 func (u *usecase) downloadImage(ctx context.Context, url, fullPath string) (err error) {
-	reader, closer, err := u.remote.GetImage(ctx, url)
+	readCloser, err := u.remote.GetImage(ctx, url)
 	if err != nil {
 		return fmt.Errorf("failed to GetImage: %w", err)
 	}
 
-	defer closer()
+	defer func() {
+		closeErr := readCloser.Close()
+		if closeErr != nil {
+			err = errors.Join(err, fmt.Errorf("failed to close readCloser: %w", closeErr))
+		}
+	}()
 
 	file, err := os.Create(fullPath)
 	if err != nil {
@@ -130,7 +135,7 @@ func (u *usecase) downloadImage(ctx context.Context, url, fullPath string) (err 
 		}
 	}()
 
-	_, err = io.Copy(file, reader)
+	_, err = io.Copy(file, readCloser)
 	if err != nil {
 		return fmt.Errorf("failed to io.Copy: %w", err)
 	}

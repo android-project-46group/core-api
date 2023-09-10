@@ -15,6 +15,6 @@ type Database interface {
 
 // HTTP 通信を伴う interface。
 type Remote interface {
-	// 対象 URL の画像を byte 配列で取得する。
-	GetImage(ctx context.Context, url string) (io.Reader, func(), error)
+	// 対象 URL の画像を取得する。
+	GetImage(ctx context.Context, url string) (io.ReadCloser, error)
 }

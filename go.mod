@@ -1,6 +1,6 @@
 module github.com/android-project-46group/core-api
 
-go 1.19
+go 1.21
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0

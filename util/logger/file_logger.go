@@ -41,6 +41,7 @@ func NewFileLogger(
 	}
 
 	return logger, func() error {
+		//nolint:wrapcheck
 		return logfile.Close()
 	}, nil
 }

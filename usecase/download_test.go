@@ -54,12 +54,12 @@ func TestDownloadMembersZip(t *testing.T) {
 					},
 				},
 				remote: &mockRemote{
-					GetImageFunc: func(ctx context.Context, url string) (io.Reader, func(), error) {
+					GetImageFunc: func(ctx context.Context, url string) (io.ReadCloser, error) {
 						data := imgBinary
 
 						reader := bytes.NewReader(data)
 
-						return reader, func() {}, nil
+						return io.NopCloser(reader), nil
 					},
 				},
 			},

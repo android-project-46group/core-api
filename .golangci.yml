@@ -6,6 +6,13 @@ linters-settings:
     settings:
       mnd:
         ignored-numbers: "0o666,0o777"
+  funlen:
+    lines: 77
+    statements: 50
+  cyclop:
+    skip-tests: true
+    max-complexity: 12
+    package-average: 0
 linters:
   enable-all: true
   disable:

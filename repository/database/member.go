@@ -43,7 +43,12 @@ func (d *database) ListMembers(ctx context.Context) ([]*model.Member, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to conn.Querytext: %w", err)
 	}
-	defer rows.Close()
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			d.logger.Warnf(ctx, "failed to rows.Close: ", err)
+		}
+	}()
 
 	members := []*model.Member{}
 

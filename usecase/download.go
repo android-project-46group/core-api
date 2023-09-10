@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -83,12 +84,18 @@ func (u *usecase) DownloadMembersZip(ctx context.Context, writer io.Writer) erro
 	return nil
 }
 
-func (u *usecase) writeMembersJSON(members []*model.Member, fullPath string) error {
+func (u *usecase) writeMembersJSON(members []*model.Member, fullPath string) (err error) {
 	file, err := os.Create(fullPath)
 	if err != nil {
 		return fmt.Errorf("failed to os.Create: %w", err)
 	}
-	defer file.Close()
+
+	defer func() {
+		closeErr := file.Close()
+		if closeErr != nil {
+			err = errors.Join(err, fmt.Errorf("failed to close json file: %w", closeErr))
+		}
+	}()
 
 	bytes, err := json.MarshalIndent(members, "", "  ")
 	if err != nil {
@@ -103,22 +110,32 @@ func (u *usecase) writeMembersJSON(members []*model.Member, fullPath string) err
 	return nil
 }
 
-func (u *usecase) downloadImage(ctx context.Context, url, fullPath string) error {
-	reader, closer, err := u.remote.GetImage(ctx, url)
+func (u *usecase) downloadImage(ctx context.Context, url, fullPath string) (err error) {
+	readCloser, err := u.remote.GetImage(ctx, url)
 	if err != nil {
 		return fmt.Errorf("failed to GetImage: %w", err)
 	}
 
-	defer closer()
+	defer func() {
+		closeErr := readCloser.Close()
+		if closeErr != nil {
+			err = errors.Join(err, fmt.Errorf("failed to close readCloser: %w", closeErr))
+		}
+	}()
 
 	file, err := os.Create(fullPath)
 	if err != nil {
 		return fmt.Errorf("failed to os.Create: %w", err)
 	}
 
-	defer file.Close()
+	defer func() {
+		closeErr := file.Close()
+		if closeErr != nil {
+			err = errors.Join(err, fmt.Errorf("failed to close img file: %w", closeErr))
+		}
+	}()
 
-	_, err = io.Copy(file, reader)
+	_, err = io.Copy(file, readCloser)
 	if err != nil {
 		return fmt.Errorf("failed to io.Copy: %w", err)
 	}
@@ -155,12 +172,17 @@ func (u *usecase) initializeImgDir(imgDir string) error {
 }
 
 // targetDir 配下のファイルを再帰的に zip 化し、渡された writer に書き込む。
-func (u *usecase) createZip(targetDir string, readWriter io.Writer) error {
+func (u *usecase) createZip(targetDir string, readWriter io.Writer) (err error) {
 	zipWriter := zip.NewWriter(readWriter)
-	defer zipWriter.Close()
+	defer func() {
+		closeErr := zipWriter.Close()
+		if closeErr != nil {
+			err = errors.Join(err, fmt.Errorf("failed to close img file: %w", closeErr))
+		}
+	}()
 
 	// ディレクトリを再帰的に探索する。
-	err := filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return fmt.Errorf("failed to Walk: %w", err)
 		}
@@ -182,7 +204,13 @@ func (u *usecase) createZip(targetDir string, readWriter io.Writer) error {
 		if err != nil {
 			return fmt.Errorf("failed to Open: %w", err)
 		}
-		defer fileToZip.Close()
+
+		defer func() {
+			closeErr := fileToZip.Close()
+			if closeErr != nil {
+				err = errors.Join(err, closeErr)
+			}
+		}()
 
 		fileToZipStat, err := fileToZip.Stat()
 		if err != nil {
